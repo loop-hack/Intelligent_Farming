@@ -15,10 +15,9 @@ def run_sensor():
             moisture = random.randint(30, 80)
             
             payload = {
-                "topic": "intelligent_farm/sensors/soil_1",
-                "path": "/features/moisture/properties/level",
-                "value": moisture
-            }
+            "path": "/features/moisture/properties/level",
+            "value": moisture
+        }
             
             client.publish("intelligent_farm/sensors/soil_1", json.dumps(payload))
             print(f"Sent moisture: {moisture}%")

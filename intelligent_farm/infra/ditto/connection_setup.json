@@ -1,23 +1,31 @@
 {
   "name": "Mosquitto Bridge",
-  "connectionType": "mqtt",
+  "connectionType": "mqtt-3-1-1",
   "connectionStatus": "open",
   "uri": "tcp://mosquitto:1883",
-  "sources": [{
-    "addresses": ["intelligent_farm/sensors/soil_1"],
-    "qos": 0,
-    "authorizationContext": ["nginx:ditto"],
-    "enforcement": {
-      "input": "org.intelligent_farm:soil_sensor_1",
-      "rule": "{{ input }} == {{ thing:id }}"
-    },
-    "payloadMapping": ["javascript"]
-  }],
+  "sources": [
+    {
+      "addresses": ["smart_farm/sensors/soil_1"],
+      "qos": 0,
+      "authorizationContext": ["pre-authenticated:ditto-user"],
+      "payloadMapping": ["javascript"]
+    }
+  ],
+  "targets": [
+    {
+      "address": "smart_farm/control/soil_1",
+      "qos": 0,
+      "authorizationContext": ["pre-authenticated:ditto-user"],
+      "topics": [
+        "_/_/things/twin/events/modified"
+      ]
+    }
+  ],
   "mappingDefinitions": {
     "javascript": {
       "mappingEngine": "JavaScript",
       "options": {
-        "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload) { var data = JSON.parse(textPayload); return Ditto.buildDittoProtocolMsg('org.intelligent_farm', 'soil_sensor_1', 'things', 'twin', 'commands', 'modify', data.path, headers, data.value); }"
+        "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) { var data = JSON.parse(textPayload); return Ditto.buildDittoProtocolMsg( 'org.smart_farm', 'soil_sensor_1', 'things', 'twin', 'commands', 'modify', data.path, headers, data.value ); }"
       }
     }
   }
