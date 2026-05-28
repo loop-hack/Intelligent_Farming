@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:  #list of containers to be run
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883" # mmeans expose port 1883 from inside the container to port 1883 on host machine
+      - "9001:9001" 
+    volumes: #mounting the config file and data directory from host machine to container
+      - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+
+  mongodb:
+    image: mongo:5
+    volumes:
+      - mongo_data:/data/db
+
+  ditto:
+    image: eclipse/ditto:3.3.0
+    ports:
+      - "8080:8080"
+    environment: #setting environment variables for ditto container it tells ditto where to find the mongodb instance and also sets the secure status to false for development purposes
+      - MONGO_DB_URI=mongodb://mongodb:27017/ditto
+      - DITTO_DEVOPS_SECURE_STATUS=false
+    depends_on: # ditto service will wait for mongodb to be up and running before starting
+      - mongodb
+
+volumes:
+  mongo_data:
+  mosquitto_data:
