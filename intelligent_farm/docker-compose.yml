@@ -1,30 +1,102 @@
 version: "3.8"
 
-services:  #list of containers to be run
+services:
 
   mosquitto:
     image: eclipse-mosquitto:2
+    container_name: smart_farm_broker
     ports:
-      - "1883:1883" # mmeans expose port 1883 from inside the container to port 1883 on host machine
+      - "1883:1883"
       - "9001:9001" 
-    volumes: #mounting the config file and data directory from host machine to container
+    volumes:
       - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mosquitto_data:/mosquitto/data
+    networks:
+      - ditto-network
 
   mongodb:
     image: mongo:5
+    container_name: smart_farm_db
     volumes:
       - mongo_data:/data/db
+    networks:
+      - ditto-network
 
-  ditto:
-    image: eclipse/ditto:3.3.0
-    ports:
-      - "8080:8080"
-    environment: #setting environment variables for ditto container it tells ditto where to find the mongodb instance and also sets the secure status to false for development purposes
+  policies:
+    image: eclipse/ditto-policies:latest
+    dns_search: local
+    environment:
       - MONGO_DB_URI=mongodb://mongodb:27017/ditto
-      - DITTO_DEVOPS_SECURE_STATUS=false
-    depends_on: # ditto service will wait for mongodb to be up and running before starting
+      - BIND_HOSTNAME=0.0.0.0
+    depends_on:
       - mongodb
+    networks:
+      ditto-network:
+        aliases:
+          - ditto-cluster
+
+  things:
+    image: eclipse/ditto-things:latest
+    dns_search: local
+    environment:
+      - MONGO_DB_URI=mongodb://mongodb:27017/ditto
+      - BIND_HOSTNAME=0.0.0.0
+    depends_on:
+      - mongodb
+      - policies
+    networks:
+      ditto-network:
+        aliases:
+          - ditto-cluster
+
+  things-search:
+    image: eclipse/ditto-things-search:latest
+    dns_search: local
+    environment:
+      - MONGO_DB_URI=mongodb://mongodb:27017/ditto
+      - BIND_HOSTNAME=0.0.0.0
+    depends_on:
+      - mongodb
+    networks:
+      ditto-network:
+        aliases:
+          - ditto-cluster
+
+  connectivity:
+    image: eclipse/ditto-connectivity:latest
+    dns_search: local
+    environment:
+      - MONGO_DB_URI=mongodb://mongodb:27017/ditto
+      - BIND_HOSTNAME=0.0.0.0
+    depends_on:
+      - mongodb
+    networks:
+      ditto-network:
+        aliases:
+          - ditto-cluster
+
+  gateway:
+    image: eclipse/ditto-gateway:latest
+    dns_search: local
+    ports:
+      - "8080:8080" # Moved the door back to the gateway
+    environment:
+      - ENABLE_PRE_AUTHENTICATION=true
+      - DITTO_DEVOPS_SECURE_STATUS=false
+      - BIND_HOSTNAME=0.0.0.0
+    depends_on:
+      - policies
+      - things
+      - things-search
+      - connectivity
+    networks:
+      ditto-network:
+        aliases:
+          - ditto-cluster
+
+networks:
+  ditto-network:
+    driver: bridge
 
 volumes:
   mongo_data:
