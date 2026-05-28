@@ -81,9 +81,10 @@ services:
     ports:
       - "8080:8080" # Moved the door back to the gateway
     environment:
-      - ENABLE_PRE_AUTHENTICATION=true
+      - ENABLE_PRE_AUTHENTICATION=false
       - DITTO_DEVOPS_SECURE_STATUS=false
       - BIND_HOSTNAME=0.0.0.0
+      - JAVA_TOOL_OPTIONS=-Dditto.gateway.authentication.devops.password=foobar
     depends_on:
       - policies
       - things

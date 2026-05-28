@@ -1,0 +1,2 @@
+packaging==26.0
+paho-mqtt @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_paho-mqtt_1755525216/work
