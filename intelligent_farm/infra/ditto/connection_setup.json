@@ -4,11 +4,11 @@
   "connectionStatus": "open",
   "uri": "tcp://mosquitto:1883",
   "sources": [{
-    "addresses": ["smart_farm/sensors/soil_1"],
+    "addresses": ["intelligent_farm/sensors/soil_1"],
     "qos": 0,
     "authorizationContext": ["nginx:ditto"],
     "enforcement": {
-      "input": "org.smart_farm:soil_sensor_1",
+      "input": "org.intelligent_farm:soil_sensor_1",
       "rule": "{{ input }} == {{ thing:id }}"
     },
     "payloadMapping": ["javascript"]
@@ -17,7 +17,7 @@
     "javascript": {
       "mappingEngine": "JavaScript",
       "options": {
-        "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload) { var data = JSON.parse(textPayload); return Ditto.buildDittoProtocolMsg('org.smart_farm', 'soil_sensor_1', 'things', 'twin', 'commands', 'modify', data.path, headers, data.value); }"
+        "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload) { var data = JSON.parse(textPayload); return Ditto.buildDittoProtocolMsg('org.intelligent_farm', 'soil_sensor_1', 'things', 'twin', 'commands', 'modify', data.path, headers, data.value); }"
       }
     }
   }
