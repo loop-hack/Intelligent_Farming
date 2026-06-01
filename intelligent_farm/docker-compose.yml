@@ -1,13 +1,12 @@
-version: "3.8"
-
 services:
 
   mosquitto:
     image: eclipse-mosquitto:2
-    container_name: intelligent_farm_broker
+    container_name: smart_farm_broker
+    restart: unless-stopped
     ports:
       - "1883:1883"
-      - "9001:9001" 
+      - "9001:9001"
     volumes:
       - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mosquitto_data:/mosquitto/data
@@ -16,7 +15,8 @@ services:
 
   mongodb:
     image: mongo:5
-    container_name: intelligent_farm_db
+    container_name: smart_farm_db
+    restart: unless-stopped
     volumes:
       - mongo_data:/data/db
     networks:
@@ -24,6 +24,8 @@ services:
 
   policies:
     image: eclipse/ditto-policies:latest
+    container_name: smart_farm_policies
+    restart: unless-stopped
     dns_search: local
     environment:
       - MONGO_DB_URI=mongodb://mongodb:27017/ditto
@@ -37,6 +39,8 @@ services:
 
   things:
     image: eclipse/ditto-things:latest
+    container_name: smart_farm_things
+    restart: unless-stopped
     dns_search: local
     environment:
       - MONGO_DB_URI=mongodb://mongodb:27017/ditto
@@ -51,6 +55,8 @@ services:
 
   things-search:
     image: eclipse/ditto-things-search:latest
+    container_name: smart_farm_things_search
+    restart: unless-stopped
     dns_search: local
     environment:
       - MONGO_DB_URI=mongodb://mongodb:27017/ditto
@@ -64,6 +70,8 @@ services:
 
   connectivity:
     image: eclipse/ditto-connectivity:latest
+    container_name: smart_farm_connectivity
+    restart: unless-stopped
     dns_search: local
     environment:
       - MONGO_DB_URI=mongodb://mongodb:27017/ditto
@@ -76,26 +84,26 @@ services:
           - ditto-cluster
 
   gateway:
-  image: eclipse/ditto-gateway:latest
-  dns_search: local
-  ports:
-    - "8080:8080"
-
-  environment:
-    - ENABLE_PRE_AUTHENTICATION=true
-    - DEVOPS_PASSWORD=foobar
-    - BIND_HOSTNAME=0.0.0.0
-
-  depends_on:
-    - policies
-    - things
-    - things-search
-    - connectivity
-
-  networks:
-    ditto-network:
-      aliases:
-        - ditto-cluster
+    image: eclipse/ditto-gateway:latest
+    container_name: smart_farm_gateway
+    restart: unless-stopped
+    dns_search: local
+    ports:
+      - "8080:8080"
+    environment:
+      - ENABLE_PRE_AUTHENTICATION=true
+      - DITTO_DEVOPS_SECURE_STATUS=false
+      - BIND_HOSTNAME=0.0.0.0
+      - JAVA_TOOL_OPTIONS=-Dditto.gateway.authentication.devops.password=foobar
+    depends_on:
+      - policies
+      - things
+      - things-search
+      - connectivity
+    networks:
+      ditto-network:
+        aliases:
+          - ditto-cluster
 
 networks:
   ditto-network:
