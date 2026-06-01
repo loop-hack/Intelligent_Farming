@@ -76,24 +76,26 @@ services:
           - ditto-cluster
 
   gateway:
-    image: eclipse/ditto-gateway:latest
-    dns_search: local
-    ports:
-      - "8080:8080" # Moved the door back to the gateway
-    environment:
-      - ENABLE_PRE_AUTHENTICATION=false
-      - DITTO_DEVOPS_SECURE_STATUS=false
-      - BIND_HOSTNAME=0.0.0.0
-      - JAVA_TOOL_OPTIONS=-Dditto.gateway.authentication.devops.password=foobar
-    depends_on:
-      - policies
-      - things
-      - things-search
-      - connectivity
-    networks:
-      ditto-network:
-        aliases:
-          - ditto-cluster
+  image: eclipse/ditto-gateway:latest
+  dns_search: local
+  ports:
+    - "8080:8080"
+
+  environment:
+    - ENABLE_PRE_AUTHENTICATION=true
+    - DEVOPS_PASSWORD=foobar
+    - BIND_HOSTNAME=0.0.0.0
+
+  depends_on:
+    - policies
+    - things
+    - things-search
+    - connectivity
+
+  networks:
+    ditto-network:
+      aliases:
+        - ditto-cluster
 
 networks:
   ditto-network:
