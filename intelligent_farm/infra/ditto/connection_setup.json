@@ -16,16 +16,14 @@
       "address": "intelligent_farm/control/soil_1",
       "qos": 0,
       "authorizationContext": ["pre-authenticated:ditto-user"],
-      "topics": [
-        "_/_/things/twin/events/modified"
-      ]
+      "topics": ["_/_/things/twin/events/modified"]
     }
   ],
   "mappingDefinitions": {
     "javascript": {
       "mappingEngine": "JavaScript",
       "options": {
-        "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) { var data = JSON.parse(textPayload); return Ditto.buildDittoProtocolMsg( 'org.intelligent_farm', 'soil_sensor_1', 'things', 'twin', 'commands', 'modify', data.path, headers, data.value ); }"
+        "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) { var data = JSON.parse(textPayload); return Ditto.buildDittoProtocolMsg('org.intelligent_farm', 'soil_sensor_1', 'things', 'twin', 'commands', 'modify', data.path, headers, data.value); }"
       }
     }
   }
